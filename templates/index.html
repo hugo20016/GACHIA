@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Enviar datos a la base de datos</title>
+</head>
+<body>
+    <h1>Enviar datos a la base de datos</h1>
+    <form method="POST" action="{{ url_for('enviar_datos') }}">
+        <label for="user_id">User ID:</label>
+        <input type="text" id="user_id" name="user_id"><br><br>
+        <label for="product_id">Product ID:</label>
+        <input type="text" id="product_id" name="product_id"><br><br>
+        <label for="quantity">Quantity:</label>
+        <input type="text" id="quantity" name="quantity"><br><br>
+        <label for="unit_price">Unit Price:</label>
+        <input type="text" id="unit_price" name="unit_price"><br><br>
+        <label for="creation_date">Creation Date:</label>
+        <input type="text" id="creation_date" name="creation_date"><br><br>
+        <label for="status">Status:</label>
+        <input type="text" id="status" name="status"><br><br>
+        <input type="submit" value="Enviar datos">
+    </form>
+</body>
+</html>
