@@ -19,7 +19,9 @@ def index():
 
 @app.route('/enviar_datos', methods=['POST'])
 def enviar_datos():
+
     # Obtener los datos del formulario
+    
     user_id = request.form['user_id']
     product_id = request.form['product_id']
     quantity = request.form['quantity']
