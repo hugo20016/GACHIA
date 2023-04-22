@@ -2,6 +2,8 @@
 
 from flask import Flask, request, render_template
 import requests
+import mysql.connector
+
 
 app = Flask(__name__)
 comprobador_Usuario = False
@@ -26,9 +28,6 @@ def enviar_datos():
     status = request.form['status']
 
     # Enviar los datos a la BBDD
-
-    
-    import mysql.connector
 
     mydb = mysql.connector.connect(
             host="gachia-db.cqhzxnm4nr1w.eu-west-1.rds.amazonaws.com",
@@ -125,7 +124,27 @@ def nuevo_pedido():
     order_id = request.json['Order_ID']
     status = request.json['Status']
 
-   
+    # Almacena los datos en la BBDD, en la tabla Cola_almacen
+    
+    with open('info.txt', 'r') as f:
+        password = f.read()
+
+    mydb = mysql.connector.connect(
+            host="localhost",
+            username="root",
+            password=password,
+            database="gachia_gs",
+            port="3306"
+        )
+    
+    mycursor = mydb.cursor()
+
+    sql = "INSERT INTO cola_almacen (Order_ID, Status) VALUES (%s, %s)"
+    val = (order_id, status)
+
+    mycursor.execute(sql, val)
+
+    mydb.commit()
 
     return 'Datos recibidos'
 
