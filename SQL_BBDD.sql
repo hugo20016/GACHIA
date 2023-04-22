@@ -1,3 +1,4 @@
+CREATE DATABASE IF NOT EXISTS gachia_gs;
 
 USE gachia_gs;
 

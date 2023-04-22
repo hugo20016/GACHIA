@@ -9,10 +9,6 @@ comprobador_Producto = False
 comprobador_Pedido = False
 comprobador_OrderDetail = False
 
-@app.route('/hola')
-def hola():
-    return '¡Hola, mundo!'
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -122,6 +118,18 @@ def enviar_datos():
         return 'Datos insertados correctamente'
     else:
         return 'Ha habido un error'
+
+@app.route('/nuevo_pedido', methods=['POST'])
+def nuevo_pedido():
+
+    order_id = request.json['Order_ID']
+    status = request.json['Status']
+
+   
+
+    return 'Datos recibidos'
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
