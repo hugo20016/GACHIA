@@ -31,10 +31,14 @@ mycursor.close()
 mydb.close()
 
 # Hacer una solicitud POST a la API con la respuesta
-url = "http://localhost:5000/nombre_funcion_api"
-payload = "{\n \"mensaje\": \"Pedido completado con éxito\"\n}"
+url = "http://localhost:5000/pedidos"
+  body = {
+        'order_id': order_id,
+        'status': 'completado'
+    }
 headers = {'Content-Type': 'application/json'}
 response = requests.post(url, headers=headers, data=payload)
+print(response.text)
 
 # Devolver la respuesta de la API
 return response.text
