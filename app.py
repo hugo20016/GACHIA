@@ -11,6 +11,9 @@ comprobador_Producto = False
 comprobador_Pedido = False
 comprobador_OrderDetail = False
 
+with open('info.txt', 'r') as f:
+    password = f.read()
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -114,9 +117,9 @@ def enviar_datos():
         comprobador_Producto = True
     
     if comprobador_Usuario == True and comprobador_Producto == True and comprobador_Pedido == True and comprobador_OrderDetail == True:
-        return 'Datos insertados correctamente'
+        return 'Pedido tramitado correctamente'
     else:
-        return 'Ha habido un error'
+        return 'Ha habido un error en la tramitación del pedido'
 
 @app.route('/nuevo_pedido', methods=['POST'])
 def nuevo_pedido():
@@ -125,9 +128,6 @@ def nuevo_pedido():
     status = request.json['Status']
 
     # Almacena los datos en la BBDD, en la tabla Cola_almacen
-    
-    with open('info.txt', 'r') as f:
-        password = f.read()
 
     mydb = mysql.connector.connect(
             host="localhost",
@@ -146,8 +146,116 @@ def nuevo_pedido():
 
     mydb.commit()
 
-    return 'Datos recibidos'
+    return 'Nuevo pedido confirmado'
 
+
+@app.route('/pedir_pedido', methods=['POST'])
+def pedir_pedido():
+    # Recibe los datos Order_ID y Status de cola_almacen, y el PickingStation_ID, date de picking_records
+    picking_station_id = request.json['PickingStation_ID']
+    
+    # Utilizando el picking_station_id, obtengo order_id, status y date de picking_records, sabiendo que esa tabla tiene como atributos PickingRecord_ID, Picking_Statin_ID, Order_ID, Date y Status
+
+    mydb = mysql.connector.connect(
+            host="localhost",
+            username="root",
+            password=password,
+            database="gachia_gs",
+            port="3306"
+        )
+    
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM picking_records WHERE PickingStation_ID = %s", (picking_station_id,))
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        order_id = x[2]
+        status = x[4]
+    
+    # Actualizo la tabla cola_almacen con los datos obtenidos de picking_records, sabiendo que la tabla cola_almacen tiene como atributos Queue_ID, Order_ID y Status
+
+    mycursor.execute("SELECT * FROM cola_almacen WHERE Order_ID = %s", (order_id,))
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        queue_id = x[0]
+
+    sql = "UPDATE cola_almacen SET Status = %s WHERE Queue_ID = %s"
+    val = (status, queue_id)
+
+    mycursor.execute(sql, val)
+
+    mydb.commit()
+
+    return 'Datos enviados a la cola del almacen'
+
+@app.route('/envia_pedido', methods=['POST'])
+def envia_pedido():
+
+    # Envía un pedido desde cola_almacen hasta puesto_picking, comprobando que el pedido no existe en puesto_picking
+
+    order_id = request.json['Order_ID']
+
+    mydb = mysql.connector.connect(
+            host="localhost",
+            username="root",
+            password=password,
+            database="gachia_gs",
+            port="3306"
+        )
+    
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM puesto_picking WHERE Order_ID = %s", (order_id,))
+    myresult = mycursor.fetchall()
+
+    if len(myresult) != 0:
+        return 'El pedido ya existe en la cola del puesto de picking'
+    else:
+        sql = "INSERT INTO puesto_picking (Order_ID) VALUES (%s)"
+        val = (order_id,)
+
+        mycursor.execute(sql, val)
+
+        mydb.commit()
+
+        return 'Pedido enviado al puesto de picking'
+    
+@app.route('/escanea_producto', methods=['POST'])
+def escanea_producto():
+
+    # Recibe el PickingStation_ID, Order_ID, Date y Status y lo almacena en picking_records, comprobando que el Order_ID no existe en picking_records
+
+    picking_station_id = request.json['PickingStation_ID']
+    order_id = request.json['Order_ID']
+    date = request.json['Date']
+    status = request.json['Status']
+
+    mydb = mysql.connector.connect(
+            host="localhost",
+            username="root",
+            password=password,
+            database="gachia_gs",
+            port="3306"
+        )
+    
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM picking_records WHERE Order_ID = %s", (order_id,))
+    myresult = mycursor.fetchall()
+
+    if len(myresult) != 0:
+        return 'El pedido ya existe en picking_records'
+    else:
+        sql = "INSERT INTO picking_records (PickingStation_ID, Order_ID, Date, Status) VALUES (%s, %s, %s, %s)"
+        val = (picking_station_id, order_id, date, status)
+
+        mycursor.execute(sql, val)
+
+        mydb.commit()
+
+        return 'Producto escaneado correctamente'
 
 if __name__ == '__main__':
     app.run(debug=True)
