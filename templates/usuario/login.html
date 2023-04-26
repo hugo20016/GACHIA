@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/assets/a.png" />
+  <link rel="stylesheet" href="/css/login.css">
+  <title>Login - Anarte</title>
+
+  
+
+  <script>
+    function forgotpwd() {
+      login_bx = document.getElementById("login_bx");
+      forgotpwd_bx = document.getElementById("forgotpwd_bx");
+      login_bx.style.display = "none";
+      forgotpwd_bx.style.display = "block";
+    }
+    function login_back() {
+      login_bx = document.getElementById("login_bx");
+      forgotpwd_bx = document.getElementById("forgotpwd_bx");
+      login_bx.style.display = "block";
+      forgotpwd_bx.style.display = "none";
+    }
+
+  </script>
+    <style type="text/css">
+      .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        margin-bottom: 1rem;
+        padding: 0.75rem 0.75rem;
+        border-radius: 0.25rem;
+      }
+      .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        margin-bottom: 1rem;
+        padding: 0.75rem 0.75rem;
+        border-radius: 0.25rem;
+      }
+    </style>
+
+
+
+</head>
+
+<body>
+  <div id="login_bx" style="display:block;">
+    <div class="container" id="container">
+      <div class="form-container sign-up-container">
+        <!--este formulario hace un post a la ruta /be/registrarse-->
+        <form action="/be/registrarse" method="POST">
+          <h1>Regístrate</h1>
+          <input type="text" placeholder="Nombre" name="usuario" required />
+          <input type="email" placeholder="Email" name="email" required />
+          <input type="password" placeholder="Contraseña" name="password" required/>
+          <button>Registrarse</button>
+        </form>
+      </div>
+      <div class="form-container sign-in-container">
+        <form action="/be/entrar" method="POST">
+          <h1>Iniciar sesión</h1>
+          <input type="text" name="usuario" placeholder="Usuario" />
+          <input type="password" name="password" placeholder="Contraseña" />
+          <a href="#" onclick="forgotpwd()">¿Olvidaste tu contraseña?</a>
+        
+          <div class="alert alert-danger" role="alert" id="error" style="display: {{errorDisplay}};">
+            {{error}}
+        </div>
+        <div class="alert alert-success" role="alert" id="success" style="display: {{successDisplay}};">
+          {{success}}
+      </div>
+          <button>Iniciar Sesión</button>
+        </form>
+      </div>
+      <div class="overlay-container">
+        <div class="overlay">
+          <div class="overlay-panel overlay-left">
+            <h1><img class="img-fluid logo" src="/assets/anarte_logo.png" alt="anarte-logo"></h1>
+            <p>Entra para consultar los archivos que Anarte comparte contigo</p>
+            <button class="ghost" id="signIn">Inicia Sesión</button>
+            
+          </div>
+          <div class="overlay-panel overlay-right">
+            <h1><img class="img-fluid logo" src="/assets/anarte_logo.png" alt="anarte-logo"></h1>
+            <p>Registrate para comenzar a trabajar con nosotros</p>
+            <button class="ghost" id="signUp">Regístrate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="forgotpwd_bx" style="display: none;">
+    <div class="container" id="container">
+      <div class="form-container sign-in-container">
+        <form action="#">
+          <h1>Recuperar cotraseña</h1>
+          <input type="email" placeholder="Email" />
+          <button id="Recover">Recuperar</button>
+        </form>
+      </div>
+      <div class="overlay-container">
+        <div class="overlay">
+          <div class="overlay-panel overlay-right">
+            <h1><img class="img-fluid logo" src="/assets/anarte_logo.png" alt="anarte-logo"></h1>
+            <br>
+            <button class="ghost" id="Back" type="button" onclick="login_back()">Volver atrás</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/login.js"></script>
+</body>
+
+</html>
