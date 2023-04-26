@@ -18,7 +18,7 @@ with open('info.txt', 'r') as f:
 def index():
     return render_template('index.html')
 
-@app.route('/enviar_datos', methods=['POST'])
+@app.route('/tramita_pedido', methods=['POST'])
 def enviar_datos():
 
     # Obtener los datos del formulario
@@ -29,36 +29,6 @@ def enviar_datos():
     unit_price = request.form['unit_price']
     creation_date = request.form['creation_date']
     status = request.form['status']
-
-    # Enviar los datos a la BBDD
-
-    mydb = mysql.connector.connect(
-            host="gachia-db.cqhzxnm4nr1w.eu-west-1.rds.amazonaws.com",
-            username="admin",
-            password="gachiaproyecto23",
-            database="gachia_gs",
-            port="3306"
-        )
-        
-    mycursor = mydb.cursor()
-
-    # Comprobar que si el User_ID existe en la BBDD. Si es así, inserta los datos correspondientes en la tabla Usuarios.
-    
-    mycursor.execute("SELECT * FROM Usuarios WHERE ID = %s", (user_id,))
-    myresult = mycursor.fetchall()
-
-    if len(myresult) == 0:
-        return 'El usuario no existe'
-    else:
-        sql = "INSERT INTO Usuarios (ID) VALUES (%s)"
-        val = (user_id,)
-
-        mycursor.execute(sql, val)
-
-        mydb.commit()
-        comprobador_Usuario = True
-
-    # Crea un nuevo Pedido en la tabla Pedidos con los datos correspondientes.
 
 
     sql = "INSERT INTO Pedidos (User_ID, ID, CreationDate, Status) VALUES (%s, %s, %s, %s)"
@@ -78,6 +48,24 @@ def enviar_datos():
 
     comprobador_Pedido = True
 
+    # Comprobar si los productos están en la BBDD
+
+    mycursor.execute("SELECT * FROM Productos WHERE ID = %s", (product_id,))
+
+    myresult = mycursor.fetchall()
+
+    if len(myresult) == 0:
+        return 'El producto no existe'
+    else:
+        sql = "INSERT INTO Productos (ID, Quantity, UnitPrice) VALUES (%s, %s, %s)"
+        val = (product_id, quantity, unit_price)
+
+        mycursor.execute(sql, val)
+
+        mydb.commit()
+
+        comprobador_Producto = True
+
     # Crea un nuevo OrderDetail en la tabla OrderDetails con los datos correspondientes.
 
     sql = "INSERT INTO OrderDetails (Order_ID, Product_ID, Quantity, UnitPrice) VALUES (%s, %s, %s, %s)"
@@ -96,30 +84,7 @@ def enviar_datos():
 
     mydb.commit()
 
-    comprobador_OrderDetail = True
-
-    # Comprobar que si el Product_ID existe en la BBDD. Si es así, inserta los datos correspondientes en la tabla Productos.
-
-    mycursor.execute("SELECT * FROM Productos WHERE ID = %s", (product_id,))
-
-    myresult = mycursor.fetchall()
-
-    if len(myresult) == 0:
-        return 'El producto no existe'
-    else:
-        sql = "INSERT INTO Productos (ID, Quantity, UnitPrice) VALUES (%s, %s, %s)"
-        val = (product_id, quantity, unit_price)
-
-        mycursor.execute(sql, val)
-
-        mydb.commit()
-
-        comprobador_Producto = True
     
-    if comprobador_Usuario == True and comprobador_Producto == True and comprobador_Pedido == True and comprobador_OrderDetail == True:
-        return 'Pedido tramitado correctamente'
-    else:
-        return 'Ha habido un error en la tramitación del pedido'
 
 @app.route('/nuevo_pedido', methods=['POST'])
 def nuevo_pedido():
@@ -193,69 +158,58 @@ def pedir_pedido():
 @app.route('/envia_pedido', methods=['POST'])
 def envia_pedido():
 
-    # Envía un pedido desde cola_almacen hasta puesto_picking, comprobando que el pedido no existe en puesto_picking
+    # Coge el último pedido de la cola_almacen y lo envías a puesto_picking
 
-    order_id = request.json['Order_ID']
+    mycursor.execute("SELECT MAX(Order_ID) FROM cola_almacen")
 
-    mydb = mysql.connector.connect(
-            host="localhost",
-            username="root",
-            password=password,
-            database="gachia_gs",
-            port="3306"
-        )
-    
-    mycursor = mydb.cursor()
+    myresult = mycursor.fetchall()
 
-    mycursor.execute("SELECT * FROM puesto_picking WHERE Order_ID = %s", (order_id,))
+    for x in myresult:
+        order_id = x[0]
+
+
+
+    # Obtenemos el PickingStation_ID
+
+    mycursor.execute("SELECT MAX(PickingStation_ID) FROM Puesto_picking")
+
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        id_puestoPicking = x[0]
+
+    # Asignamos ese pedido a un PickingRecord con el OrderID 
+
+    mycursor.execute("SELECT * FROM pickingRecord WHERE Order_ID = %s", (order_id,))
     myresult = mycursor.fetchall()
 
     if len(myresult) != 0:
         return 'El pedido ya existe en la cola del puesto de picking'
     else:
-        sql = "INSERT INTO puesto_picking (Order_ID) VALUES (%s)"
-        val = (order_id,)
+        mycursor.execute("INSERT into PickingRecord VALUES (%s, %s)")
+        val = (order_id, id_puestoPicking)
 
         mycursor.execute(sql, val)
 
         mydb.commit()
+
+        # Actualizamos el status del pedido
+
+        mycursor.execute("UPDATE Pedidos SET Status = 'En almacen' WHERE ID = %s", (order_id,))
+
+        mydb.commit()
+
+
 
         return 'Pedido enviado al puesto de picking'
     
 @app.route('/escanea_producto', methods=['POST'])
 def escanea_producto():
 
-    # Recibe el PickingStation_ID, Order_ID, Date y Status y lo almacena en picking_records, comprobando que el Order_ID no existe en picking_records
+    # Función que simule el que se estén escanando los pedidos en el puesto picking
+    # correspondiente al último order que exista
 
-    picking_station_id = request.json['PickingStation_ID']
-    order_id = request.json['Order_ID']
-    date = request.json['Date']
-    status = request.json['Status']
-
-    mydb = mysql.connector.connect(
-            host="localhost",
-            username="root",
-            password=password,
-            database="gachia_gs",
-            port="3306"
-        )
-    
-    mycursor = mydb.cursor()
-
-    mycursor.execute("SELECT * FROM picking_records WHERE Order_ID = %s", (order_id,))
-    myresult = mycursor.fetchall()
-
-    if len(myresult) != 0:
-        return 'El pedido ya existe en picking_records'
-    else:
-        sql = "INSERT INTO picking_records (PickingStation_ID, Order_ID, Date, Status) VALUES (%s, %s, %s, %s)"
-        val = (picking_station_id, order_id, date, status)
-
-        mycursor.execute(sql, val)
-
-        mydb.commit()
-
-        return 'Producto escaneado correctamente'
+    # Una vez termine, indicar que el pedido se ha completado
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -7,9 +7,9 @@ ID INT NOT NULL AUTO_INCREMENT,
 FirstName VARCHAR(50),
 LastName VARCHAR(50),
 Email VARCHAR(100),
-Password VARCHAR(100),
-Address VARCHAR(200),
-PRIMARY KEY (ID)
+password VARCHAR(32),
+user VARCHAR(32),
+PRIMARY KEY (id) int(11)
 );
 
 -- Tabla para almacenar la información de los productos.
@@ -33,13 +33,13 @@ PRIMARY KEY (ID)
 -- Tabla para almacenar la información de los pedidos.
 CREATE TABLE IF NOT EXISTS Pedidos (
 ID INT NOT NULL AUTO_INCREMENT,
-User_ID INT,
+User_ID int(11),
 CreationDate DATE,
 Product_ID INT,
 Supplier_ID INT,
 Status VARCHAR(50),
 PRIMARY KEY (ID),
-FOREIGN KEY (User_ID) REFERENCES Usuarios(ID),
+FOREIGN KEY (User_ID) REFERENCES Usuarios(id),
 FOREIGN KEY (Product_ID) REFERENCES Productos(ID),
 FOREIGN KEY (Supplier_ID) REFERENCES Proveedores(ID)
 );
