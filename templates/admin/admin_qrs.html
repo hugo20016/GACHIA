@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Panel de configuración | Gachia</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="/admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="/admin/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <script>
+        var pagina_principal = 1;
+
+        function SearchElement(){
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("Buscador");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("Tabla_qr");
+            tr = table.getElementsByTagName("tr");
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        function ShowPage(page){
+            console.log("Pagina selecionada: "+page);
+            var table, tr, td, i, txtValue, disp_size;
+            table = document.getElementById("Tabla_qr");
+            tr = table.getElementsByTagName("tr");
+            disp_size = document.getElementById("selector").value;
+
+            pagina_principal = page;
+            var first = (page-1)*disp_size;
+            var last = page*disp_size;
+
+            //Recorremos la tabla y ocultamos todos los elementos que no esten en el rango de la pagina
+            for (i = 0; i < tr.length; i++) {
+                if(i>=first && i<last){
+                    tr[i].style.display = "";
+                }else{
+                    tr[i].style.display = "none";
+                }
+            }
+
+            var prev_page, next_page;
+            
+            //Obtenemos el numero de elementos a mostrar
+            var disp_size = document.getElementById("selector").value;
+            //obtenemos el numero de elementos de la tabla
+            var size_table = document.getElementById("Tabla_qr").getElementsByTagName("tr").length;
+            //Calculamos el numero de paginas
+            var num_pages = Math.ceil(size_table/disp_size);
+            //Obtenemos el elemento donde se mostraran las paginas
+            var pages = document.getElementById("Selector_Pagina");
+            //Limpiamos el elemento
+            pages.innerHTML = "";
+
+            //Creamos el elemento para la pagina anterior que debe estar deshabilitado
+            var prev = document.createElement("li");
+            if(num_pages>1 && page>1){
+                prev.className = "page-item";
+            }else{
+                prev.className = "page-item disabled";
+            }
+            var prev_link = document.createElement("a");
+            prev_link.className = "page-link";
+            prev_link.href = "#";
+            prev_link.innerHTML = "Anterior";
+            prev_page = pagina_principal-1;
+            prev_link.onclick = function(){
+                ShowPage(prev_page);
+            }
+            prev.appendChild(prev_link);
+            pages.appendChild(prev);
+
+            //Creamos los elementos para las paginas
+            for(var i=1; i<=num_pages; i++){
+
+                if(i==page){
+                    var page = document.createElement("li");
+                    page.className = "page-item active";
+                    var page_link = document.createElement("a");
+                    page_link.className = "page-link";
+                    page_link.href = "#";
+                    page_link.innerHTML = i;
+                    page_link.onclick = function(){
+                        ShowPage(this.innerHTML);
+                    }
+                    page.appendChild(page_link);
+                    pages.appendChild(page);
+                    continue;
+                }
+                else
+                {
+                    var page = document.createElement("li");
+                    page.className = "page-item";
+                    var page_link = document.createElement("a");
+                    page_link.className = "page-link";
+                    page_link.href = "#";
+                    page_link.innerHTML = i;
+                    page_link.onclick = function(){
+                        ShowPage(this.innerHTML);
+                    }
+                    page.appendChild(page_link);
+                    pages.appendChild(page);
+                }
+
+            }
+
+            //Creamos el elemento para la pagina siguiente que debe estar habilitado solo si hay mas de una pagina
+            var next = document.createElement("li");
+            if(num_pages>1 && pagina_principal<num_pages){
+                next.className = "page-item";
+            }else{
+                next.className = "page-item disabled";
+            }
+            var next_link = document.createElement("a");
+            next_link.className = "page-link";
+            next_link.href = "#";
+            next_link.innerHTML = "Siguiente";
+            next_page = pagina_principal+1;
+            next_link.onclick = function(){
+                ShowPage(next_page);
+            }
+            next.appendChild(next_link);
+            pages.appendChild(next);
+
+            //Escribimos el texto de la pagina actual  info_tabla
+            var info_tabla = document.getElementById("info_tabla");
+            info_tabla.innerHTML = "Mostrando "+first+"-"+last+" de "+size_table+" elementos";
+            
+
+
+
+
+        }
+
+        function SizeSelector(){
+            pagina_principal = 1;
+            ShowPage(1);
+        }
+
+        function on_load(){
+            ShowPage(1);
+        }
+
+        function Inspeccionar(id){
+            document.getElementById("id_input").value = id;
+            document.getElementById("form").submit();
+            
+        }
+
+    </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 48
+    }
+    </style>
+
+</head>
+
+<body id="page-top" onload="on_load()">
+
+    <form id="form" method="post" action="/be/admin/archivo_qr_individual">
+        <input type="hidden" name="id" id="id_input" value="">
+    </form>
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/be/admin/control_panel">
+                <div class="logo">
+                    <img src="/assets/a_white.png" />
+                </div>
+                <div class="sidebar-brand-text mx-3">CONFIGURACIÓN</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item ">
+                <a class="nav-link" href="/be/admin/control_panel">
+                    <i class="fas fa-fw fa-chart-area"></i>
+                    <span>Estadísticas</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Herramientas
+            </div>
+
+            <!-- Nav Item - Utilities Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
+                    aria-expanded="true" aria-controls="collapseUtilities">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Pedidos</span>
+                </a>
+                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Opciones:</h6>
+                        <a class="collapse-item" href="/be/admin/admin_qr">Administrar pedidos</a>
+                        <a class="collapse-item" href="/be/admin/upload_qr">Nuevo pedido</a>
+                    </div>
+                </div>
+            </li>
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{USUARIO}}</span>
+                                <img class="img-profile rounded-circle" src="/admin/img/undraw_profile.svg">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+
+
+                                <!--<a class="dropdown-item" href="#">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                            
+                                <div class="dropdown-divider"></div>
+                                -->
+
+
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Cerrar sesíon
+                                </a>
+                            </div>
+                        </li>
+
+                    </ul>
+
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Panel de control</h1>
+                        
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+
+                        <!-- Lecturas de QRs Card Example -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Lecturas de QRs</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{QR_CONTADOR}}</div>
+                                        </div>
+                                        <div class="col-auto">
+
+                                            <i class="fas fa-qrcode fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Espacio restante en el equipo Card Example -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Espacio
+                                                servidor
+                                            </div>
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col-auto">
+                                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                                        {{DISK_USED}}%</div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="progress progress-sm mr-2">
+                                                        <div class="progress-bar bg-info" role="progressbar"
+                                                            style="width: {{DISK_USED}}%" aria-valuenow="50"
+                                                            aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-database fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notificaciones  Card Example -->
+
+                    </div>
+
+                    <!-- Content Row -->
+
+                    <div class="row">
+
+                        <!-- Area Chart -->
+                        <div class="col-xl-12 col-lg-12">
+
+
+                            <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap5">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-6">
+                                        <div class="dataTables_length"><label>Mostrar <select
+                                                    name="example_length" aria-controls="example"
+                                                    class="form-select form-select-sm" id="selector" onchange="SizeSelector()">
+                                                    <option value="10">10</option>
+                                                    <option value="25">25</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> elementos</label></div>
+                                    </div>
+                                    <div class="col-sm-12 col-md-6">
+                                        <div id="example_filter" class="dataTables_filter" style="text-align: right;"><label style="text-align: left;">Buscar:<input
+                                                    type="search" class="form-control form-control-sm" placeholder=""
+                                                    aria-controls="example" id="Buscador" onkeyup="SearchElement()"
+                                                    ></label></div>
+                                    </div>
+                                </div>
+                                <div class="row dt-row">
+                                    <div class="col-sm-12">
+                                        <table id="Tabla_qr" class="table table-striped dataTable" style="width: 100%;"
+                                            aria-describedby="example_info">
+                                            <thead>
+                                                <tr>
+                                                    <th class="sorting sorting_asc" tabindex="0" aria-controls="example"
+                                                        rowspan="1" colspan="1" aria-sort="ascending"
+                                                        aria-label="Name: activate to sort column descending"
+                                                        style="width: 136px;">Numero de pedido</th>
+                                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1"
+                                                        colspan="1"
+                                                        aria-label="Position: activate to sort column ascending"
+                                                        style="width: 218px;">Estado</th>
+                                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1"
+                                                        colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 101px;">Agencia</th>
+                                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1"
+                                                        colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 101px;">Tipo de envio</th>
+                                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1"
+                                                        colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 101px;">Inspeccionar</th>
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+
+                                                    {% for qr in Archivos %}
+                                                        {% if loop.index is divisibleby(2) %}
+                                                            <tr class="even">
+                                                        {% else %}
+                                                            <tr class="odd">
+                                                        {% endif %}
+                                                            <td class="sorting_1">{{qr['ID']}}</td>
+                                                            <td>{{qr['Status']}}</td>
+                                                            <td>{{qr['Agencia']}}</td>
+                                                            <td>{{qr['Tipo_envio']}}</td>
+
+                                                            <td>
+                                                                <!-- Button trigger modal -->
+                                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" onclick="Inspeccionar('{{qr['ID']}}')"
+                                                                    data-bs-target="#exampleModal">
+                                                                    Inspeccionar
+                                                                </button>
+                                                            </td>
+                                                        
+                                                    {% endfor %}
+
+                                            </tbody>
+                                            
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-5">
+                                        <div class="dataTables_info" id="info_tabla" role="status" aria-live="polite">
+                                            Showing 1 to 10 of 57 entries</div>
+                                    </div>
+                                    <div class="col-sm-12 col-md-7">
+                                        <div class="dataTables_paginate paging_simple_numbers" id="example_paginate" style="text-align: center;">
+                                            <ul class="pagination" id="Selector_Pagina">
+                                                
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+    <!-- /.container-fluid -->
+
+    </div>
+    <!-- End of Main Content -->
+
+    <!-- Footer -->
+    <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Copyright &copy; Your Website 2021</span>
+            </div>
+        </div>
+    </footer>
+    <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">¿Seguro que quieres salir?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Pulsa en salir si deseas cerrar la Sesión</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="/be/admin/logout">Salir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/admin/vendor/jquery/jquery.min.js"></script>
+    <script src="/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="/admin/js/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="/admin/vendor/chart.js/Chart.min.js"></script>
+
+    <!-- Page level custom scripts 
+    <script src="/admin/js/demo/chart-area-demo.js"></script>
+    <script src="/admin/js/demo/chart-pie-demo.js"></script>-->
+
+    <script>
+        // Set new default font family and font color to mimic Bootstrap's default styling
+        Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+        Chart.defaults.global.defaultFontColor = '#858796';
+
+        function number_format(number, decimals, dec_point, thousands_sep) {
+            // *     example: number_format(1234.56, 2, ',', ' ');
+            // *     return: '1 234,56'
+            number = (number + '').replace(',', '').replace(' ', '');
+            var n = !isFinite(+number) ? 0 : +number,
+                prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+                sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+                dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+                s = '',
+                toFixedFix = function (n, prec) {
+                    var k = Math.pow(10, prec);
+                    return '' + Math.round(n * k) / k;
+                };
+            // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+            s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+            if (s[0].length > 3) {
+                s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+            }
+            if ((s[1] || '').length < prec) {
+                s[1] = s[1] || '';
+                s[1] += new Array(prec - s[1].length + 1).join('0');
+            }
+            return s.join(dec);
+        }
+
+        // Area Chart Example
+        var ctx = document.getElementById("myAreaChart");
+        var myLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+                datasets: [{
+                    label: "Visitas",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: [{{ YEAR_DATA }}],
+            }],
+        },
+            options: {
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 25,
+                    top: 25,
+                    bottom: 0
+                }
+            },
+            scales: {
+                xAxes: [{
+                    time: {
+                        unit: 'date'
+                    },
+                    gridLines: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 12
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        // Include a dollar sign in the ticks
+                        callback: function (value, index, values) {
+                            return number_format(value);
+                        }
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }],
+            },
+            legend: {
+                display: false
+            },
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                intersect: false,
+                mode: 'index',
+                caretPadding: 10,
+                callbacks: {
+                    label: function (tooltipItem, chart) {
+                        var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                        return datasetLabel + ':' + number_format(tooltipItem.yLabel);
+                    }
+                }
+            }
+        }
+});
+    </script>
+    <script>
+
+
+        // Set new default font family and font color to mimic Bootstrap's default styling
+        Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+        Chart.defaults.global.defaultFontColor = '#858796';
+
+        // Pie Chart Example
+        var ctx = document.getElementById("myPieChart");
+        var myPieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+
+                    {% for country in COUNTRY_LABELS %}
+                      "{{country}}",
+                     {% endfor %}
+                 ],
+
+        datasets: [{
+            data: [
+                {% for date in COUNTRY_DATA %}
+                    "{{date}}",
+        {% endfor %}
+        ],
+
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#f6c23e', '#e74a3b'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+    }],
+  },
+        options: {
+            maintainAspectRatio: false,
+                tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                        borderColor: '#dddfeb',
+                            borderWidth: 1,
+                                xPadding: 15,
+                                    yPadding: 15,
+                                        displayColors: true,
+                                            caretPadding: 10,
+    },
+            legend: {
+                display: true
+            },
+            cutoutPercentage: 80,
+  },
+});
+
+
+
+
+    </script>
+
+
+</body>
+
+</html>
